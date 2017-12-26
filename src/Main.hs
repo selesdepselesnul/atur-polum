@@ -3,8 +3,8 @@ import Sound.ALSA.Mixer
 import qualified Control.Monad as CM
 import qualified System.Environment as Environment
 
-changeVolumeBy :: Integer -> IO ()
-changeVolumeBy i =
+adjustVolume :: Integer -> IO ()
+adjustVolume i =
     withMixer "default" $ \mixer ->
       do Just control <- getControlByName mixer "Master"
          let Just playbackVolume = playback $ volume control
@@ -13,7 +13,7 @@ changeVolumeBy i =
          case vol of
            Just x -> 
              CM.when True
-                 (setChannel FrontLeft (value $ playbackVolume) (x + i) )
+                 (setChannel FrontLeft (value $ playbackVolume) (x + i))
            _ -> putStrLn "failed"
 
 main :: IO ()
@@ -25,6 +25,7 @@ main = do
       handlePolum $ head args
     where handlePolum arg = 
            case arg of
-           "+" -> changeVolumeBy 1
+           "+" -> adjustVolume 1
+           "-" -> adjustVolume (-1)
            _ -> putStrLn "argument doesnt valid" 
 
