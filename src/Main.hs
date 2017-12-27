@@ -2,6 +2,7 @@ module Main where
 import Sound.ALSA.Mixer
 import qualified Control.Monad as CM
 import qualified System.Environment as Environment
+import Text.Read
 
 adjustVolume :: Integer -> IO ()
 adjustVolume i =
@@ -10,12 +11,12 @@ adjustVolume i =
          let Just playbackVolume = playback $ volume control
          (minVolume, maxVolume) <- getRange playbackVolume
          oldVolume <- getChannel FrontLeft $ value playbackVolume
-                 
+         
          case oldVolume of 
            Just x -> do
              let newVolume = x + i
              if (newVolume >= minVolume ) && (newVolume <= maxVolume) then do 
-                 setChannel FrontLeft (value $ playbackVolume) newVolume
+                 setChannel FrontLeft (value playbackVolume) newVolume
                  putStrLn $ show newVolume
              else
                  putStrLn "volume reach bound"
@@ -26,11 +27,10 @@ main = do
     args <- Environment.getArgs
     if length args == 0 then
       putStrLn "please, fill the argument"
-    else
-      handlePolum $ head args
-    where handlePolum arg = 
-           case arg of
-           "+" -> adjustVolume 1
-           "-" -> adjustVolume (-1)
-           _ -> putStrLn "argument doesnt valid" 
+    else 
+      case (readMaybe (head args)) :: Maybe Integer of
+      Just x -> adjustVolume x
+      Nothing -> putStrLn "argument doesnt valid"
+
+
 
