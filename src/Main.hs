@@ -9,11 +9,16 @@ adjustVolume i =
       do Just control <- getControlByName mixer "Master"
          let Just playbackVolume = playback $ volume control
          (min, max) <- getRange playbackVolume
-         vol <- getChannel FrontLeft $ value $ playbackVolume
-         case vol of
-           Just x -> 
-             CM.when True
-                 (setChannel FrontLeft (value $ playbackVolume) (x + i))
+         oldVolume <- getChannel FrontLeft $ value $ playbackVolume
+                 
+         case oldVolume of
+           Just x -> do
+             let newVolume = x + i
+             if ((newVolume >= min ) && (newVolume <= max)) then do 
+                 (setChannel FrontLeft (value $ playbackVolume) newVolume)
+                 putStrLn $ show newVolume
+             else
+                 putStrLn "volume reach bound"
            _ -> putStrLn "failed"
 
 main :: IO ()
@@ -28,4 +33,3 @@ main = do
            "+" -> adjustVolume 1
            "-" -> adjustVolume (-1)
            _ -> putStrLn "argument doesnt valid" 
-
