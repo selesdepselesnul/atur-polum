@@ -8,13 +8,13 @@ adjustVolume i =
     withMixer "default" $ \mixer ->
       do Just control <- getControlByName mixer "Master"
          let Just playbackVolume = playback $ volume control
-         (min, max) <- getRange playbackVolume
+         (minVolume, maxVolume) <- getRange playbackVolume
          oldVolume <- getChannel FrontLeft $ value playbackVolume
                  
          case oldVolume of 
            Just x -> do
              let newVolume = x + i
-             if (newVolume >= min ) && (newVolume <= max) then do 
+             if (newVolume >= minVolume ) && (newVolume <= maxVolume) then do 
                  setChannel FrontLeft (value $ playbackVolume) newVolume
                  putStrLn $ show newVolume
              else
@@ -33,3 +33,4 @@ main = do
            "+" -> adjustVolume 1
            "-" -> adjustVolume (-1)
            _ -> putStrLn "argument doesnt valid" 
+
