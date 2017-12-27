@@ -9,13 +9,13 @@ adjustVolume i =
       do Just control <- getControlByName mixer "Master"
          let Just playbackVolume = playback $ volume control
          (min, max) <- getRange playbackVolume
-         oldVolume <- getChannel FrontLeft $ value $ playbackVolume
+         oldVolume <- getChannel FrontLeft $ value playbackVolume
                  
-         case oldVolume of
+         case oldVolume of 
            Just x -> do
              let newVolume = x + i
-             if ((newVolume >= min ) && (newVolume <= max)) then do 
-                 (setChannel FrontLeft (value $ playbackVolume) newVolume)
+             if (newVolume >= min ) && (newVolume <= max) then do 
+                 setChannel FrontLeft (value $ playbackVolume) newVolume
                  putStrLn $ show newVolume
              else
                  putStrLn "volume reach bound"
