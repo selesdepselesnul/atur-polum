@@ -4,15 +4,15 @@ import qualified Control.Monad as CM
 import qualified System.Environment as Environment
 import Text.Read
 
-data VolumeInfo a = VolumeInfo {min::Integer,
-                                max::Integer,
-                                vol::Maybe Integer,
-                                playbackVol::Volume}
+data VolumeInfo = VolumeInfo {min::Integer,
+                              max::Integer,
+                              vol::Maybe Integer,
+                              playbackVol::Volume}
 
-withVolumeDo :: (VolumeInfo a -> IO a) -> IO a
+withVolumeDo :: (VolumeInfo -> IO a) -> IO a
 withVolumeDo f =
-      withMixer "default" $ \mixer ->
-      do Just control <- getControlByName mixer "Master"
+      withMixer "default" $ \mixer -> do
+         Just control <- getControlByName mixer "Master"
          let Just playbackVolume = playback $ volume control
          (minVolume, maxVolume) <- getRange playbackVolume
          oldVolume <- getChannel FrontLeft $ value playbackVolume
