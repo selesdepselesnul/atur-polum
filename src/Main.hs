@@ -4,7 +4,10 @@ import qualified Control.Monad as CM
 import qualified System.Environment as Environment
 import Text.Read
 
-data VolumeInfo a = VolumeInfo {min::Integer, max::Integer, vol::Maybe Integer, playbackVol::Volume}
+data VolumeInfo a = VolumeInfo {min::Integer,
+                                max::Integer,
+                                vol::Maybe Integer,
+                                playbackVol::Volume}
 
 withVolumeDo :: (VolumeInfo a -> IO a) -> IO a
 withVolumeDo f =
@@ -40,10 +43,15 @@ main = do
              case oldVol of
                Just x -> putStrLn (show x)
                Nothing -> putStrLn "something wrong")
-    else 
-      case (readMaybe (head args)) :: Maybe Integer of
-      Just x -> adjustVolume x
-      Nothing -> putStrLn "argument doesnt valid"
+    else do
+      let arg = (head args)
 
-
+      case arg of
+          "--min" -> withVolumeDo
+                         (\(VolumeInfo minVol _ _ _) -> putStrLn (show minVol))
+          "--max" -> withVolumeDo
+                         (\(VolumeInfo _ maxVol _ _) -> putStrLn (show maxVol))
+          _ -> case (readMaybe arg) :: Maybe Integer of
+                   Just x -> adjustVolume x
+                   Nothing -> putStrLn "argument doesnt valid"
 
