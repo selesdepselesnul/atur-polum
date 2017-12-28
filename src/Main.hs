@@ -4,29 +4,42 @@ import qualified Control.Monad as CM
 import qualified System.Environment as Environment
 import Text.Read
 
-adjustVolume :: Integer -> IO ()
-adjustVolume i =
-    withMixer "default" $ \mixer ->
+data VolumeInfo a = VolumeInfo {min::Integer, max::Integer, vol::Maybe Integer, playbackVol::Volume}
+
+withVolumeDo :: (VolumeInfo a -> IO a) -> IO a
+withVolumeDo f =
+      withMixer "default" $ \mixer ->
       do Just control <- getControlByName mixer "Master"
          let Just playbackVolume = playback $ volume control
          (minVolume, maxVolume) <- getRange playbackVolume
          oldVolume <- getChannel FrontLeft $ value playbackVolume
+
+         f $ VolumeInfo minVolume maxVolume oldVolume playbackVolume
+
+adjustVolume :: Integer -> IO ()
+adjustVolume i =
+         withVolumeDo
+          (\(VolumeInfo minVol maxVol oldVol playbackVol) ->
+              case oldVol of 
+              Just x -> do
+                  let newVolume = x + i
+                  if (newVolume >= minVol ) && (newVolume <= maxVol) then do 
+                      setChannel FrontLeft (value playbackVol) newVolume
+                      putStrLn $ show newVolume
+                  else
+                      putStrLn "volume reach bound"
+              _ -> putStrLn "failed")
          
-         case oldVolume of 
-           Just x -> do
-             let newVolume = x + i
-             if (newVolume >= minVolume ) && (newVolume <= maxVolume) then do 
-                 setChannel FrontLeft (value playbackVolume) newVolume
-                 putStrLn $ show newVolume
-             else
-                 putStrLn "volume reach bound"
-           _ -> putStrLn "failed"
 
 main :: IO ()
 main = do
     args <- Environment.getArgs
     if length args == 0 then
-      putStrLn "please, fill the argument"
+      withVolumeDo
+          (\(VolumeInfo _ _ oldVol _) ->
+             case oldVol of
+               Just x -> putStrLn (show x)
+               Nothing -> putStrLn "something wrong")
     else 
       case (readMaybe (head args)) :: Maybe Integer of
       Just x -> adjustVolume x
