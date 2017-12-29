@@ -11,6 +11,11 @@ data VolumeInfo = VolumeInfo {min::Integer,
                               vol::Maybe Integer,
                               playbackVol::Volume}
 
+instance Show VolumeInfo where
+  show (VolumeInfo min max (Just vol) _) =
+    "Min : " ++ (show min) ++ ", Max : " ++ (show max) ++ ", Vol : " ++ (show vol)
+  show (VolumeInfo _ _ Nothing _) = "Something wrong"
+
 withVolumeDo :: (VolumeInfo -> IO a) -> IO a
 withVolumeDo f =
       withMixer "default" $ \mixer -> do
@@ -76,7 +81,7 @@ main = do
                            (\(VolumeInfo minVol _ _ _) -> (putStrLn . show) minVol)
             "--max" -> withVolumeDo
                            (\(VolumeInfo _ maxVol _ _) -> (putStrLn . show) maxVol)
+            "--all" -> withVolumeDo $ putStrLn . show 
             _ -> adjustVolumeStr arg
-
 
 
