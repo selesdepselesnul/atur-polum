@@ -3,6 +3,8 @@ import Sound.ALSA.Mixer
 import qualified Control.Monad as CM
 import qualified System.Environment as Environment
 import Text.Read
+import qualified Data.List as List
+import qualified Data.List.Split as Split
 
 data VolumeInfo = VolumeInfo {min::Integer,
                               max::Integer,
@@ -32,7 +34,13 @@ adjustVolume i =
                   else
                       putStrLn "volume reach bound"
               _ -> putStrLn "failed")
-         
+
+adjustVolumeStrWith :: String -> IO ()
+adjustVolumeStrWith vol =
+  case (readMaybe vol) :: Maybe Integer of
+    Just x -> adjustVolume x
+    Nothing -> putStrLn "argument doesnt valid"
+
 
 main :: IO ()
 main = do
@@ -51,7 +59,8 @@ main = do
                          (\(VolumeInfo minVol _ _ _) -> putStrLn (show minVol))
           "--max" -> withVolumeDo
                          (\(VolumeInfo _ maxVol _ _) -> putStrLn (show maxVol))
-          _ -> case (readMaybe arg) :: Maybe Integer of
-                   Just x -> adjustVolume x
-                   Nothing -> putStrLn "argument doesnt valid"
+          _ -> if List.isInfixOf "+" arg
+               then adjustVolumeStrWith (last (Split.splitOn "+" arg))
+               else adjustVolumeStrWith arg
+
 
