@@ -48,17 +48,17 @@ setVolume i =
               _ -> putStrLn "failed")
 
 
-adjustVolumeStr :: (Integer -> IO ()) -> String -> IO ()
-adjustVolumeStr f vol =
+validateArg :: (Integer -> IO ()) -> String -> IO ()
+validateArg f vol =
     case (readMaybe vol) :: Maybe Integer of
         Just x -> f x
         Nothing -> putStrLn "argument doesnt valid"
 
 adjustVolumeStrWithSign :: String -> IO ()
 adjustVolumeStrWithSign arg
-    | List.isInfixOf "+" arg = adjustVolumeStr adjustVolume $ last (Split.splitOn "+" arg)
-    | List.isInfixOf "-" arg = adjustVolumeStr adjustVolume arg
-    | otherwise = adjustVolumeStr setVolume arg
+    | List.isInfixOf "+" arg = validateArg adjustVolume $ last (Split.splitOn "+" arg)
+    | List.isInfixOf "-" arg = validateArg adjustVolume arg
+    | otherwise = validateArg setVolume arg
    
 main :: IO ()
 main = do
