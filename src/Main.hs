@@ -51,11 +51,13 @@ setVolume i =
               _ -> putStrLn "failed")
 
 
+adjustVolumeStr :: (Integer -> IO ()) -> String -> IO ()
 adjustVolumeStr f vol =
   case (readMaybe vol) :: Maybe Integer of
     Just x -> f x
     Nothing -> putStrLn "argument doesnt valid"
-  
+
+adjustVolumeStrWithSign :: String -> IO ()
 adjustVolumeStrWithSign arg
  | List.isInfixOf "+" arg = adjustVolumeStr adjustVolume $ last (Split.splitOn "+" arg)
  | List.isInfixOf "-" arg = adjustVolumeStr adjustVolume arg
@@ -79,6 +81,5 @@ main = do
           "--max" -> withVolumeDo
                          (\(VolumeInfo _ maxVol _ _) -> putStrLn (show maxVol))
           _ -> adjustVolumeStrWithSign arg
-
 
 
