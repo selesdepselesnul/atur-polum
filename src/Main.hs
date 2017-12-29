@@ -1,6 +1,5 @@
 module Main where
 import Sound.ALSA.Mixer
-import qualified Control.Monad as CM
 import qualified System.Environment as Environment
 import Text.Read
 import qualified Data.List as List
