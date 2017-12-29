@@ -35,13 +35,32 @@ adjustVolume i =
                       putStrLn "volume reach bound"
               _ -> putStrLn "failed")
 
-adjustVolumeStrWith :: String -> IO ()
-adjustVolumeStrWith vol =
+setVolume :: Integer -> IO ()
+setVolume i =
+         withVolumeDo
+          (\(VolumeInfo minVol maxVol oldVol playbackVol) ->
+              case oldVol of 
+              Just x -> do
+
+                  if (i >= minVol ) && (i <= maxVol) then do 
+                      setChannel FrontLeft (value playbackVol) (-x)
+                      setChannel FrontLeft (value playbackVol) i 
+                      putStrLn $ show i
+                  else
+                      putStrLn "volume reach bound"
+              _ -> putStrLn "failed")
+
+
+adjustVolumeStr f vol =
   case (readMaybe vol) :: Maybe Integer of
-    Just x -> adjustVolume x
+    Just x -> f x
     Nothing -> putStrLn "argument doesnt valid"
-
-
+  
+adjustVolumeStrWithSign arg
+ | List.isInfixOf "+" arg = adjustVolumeStr adjustVolume $ last (Split.splitOn "+" arg)
+ | List.isInfixOf "-" arg = adjustVolumeStr adjustVolume arg
+ | otherwise = adjustVolumeStr setVolume arg
+   
 main :: IO ()
 main = do
     args <- Environment.getArgs
@@ -59,8 +78,7 @@ main = do
                          (\(VolumeInfo minVol _ _ _) -> putStrLn (show minVol))
           "--max" -> withVolumeDo
                          (\(VolumeInfo _ maxVol _ _) -> putStrLn (show maxVol))
-          _ -> if List.isInfixOf "+" arg
-               then adjustVolumeStrWith (last (Split.splitOn "+" arg))
-               else adjustVolumeStrWith arg
+          _ -> adjustVolumeStrWithSign arg
+
 
 
