@@ -54,8 +54,8 @@ validateArg f vol =
         Just x -> f x
         Nothing -> putStrLn "argument doesnt valid"
 
-adjustVolumeStrWithSign :: String -> IO ()
-adjustVolumeStrWithSign arg
+adjustVolumeStr :: String -> IO ()
+adjustVolumeStr arg
     | List.isInfixOf "+" arg = validateArg adjustVolume $ last (Split.splitOn "+" arg)
     | List.isInfixOf "-" arg = validateArg adjustVolume arg
     | otherwise = validateArg setVolume arg
@@ -76,6 +76,7 @@ main = do
                            (\(VolumeInfo minVol _ _ _) -> (putStrLn . show) minVol)
             "--max" -> withVolumeDo
                            (\(VolumeInfo _ maxVol _ _) -> (putStrLn . show) maxVol)
-            _ -> adjustVolumeStrWithSign arg
+            _ -> adjustVolumeStr arg
+
 
 
