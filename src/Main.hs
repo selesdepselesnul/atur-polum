@@ -68,11 +68,7 @@ main :: IO ()
 main = do
     args <- Environment.getArgs
     if length args == 0 then
-        withVolumeDo
-            (\(VolumeInfo _ _ oldVol _) ->
-                case oldVol of
-                    Just x -> putStrLn $ show x
-                    Nothing -> putStrLn "something wrong")
+        putStrLn "please provide argument"
     else do
         let arg = (head args)
         case arg of
@@ -80,7 +76,12 @@ main = do
                            (\(VolumeInfo minVol _ _ _) -> (putStrLn . show) minVol)
             "--max" -> withVolumeDo
                            (\(VolumeInfo _ maxVol _ _) -> (putStrLn . show) maxVol)
-            "--all" -> withVolumeDo $ putStrLn . show 
+            "--all" -> withVolumeDo $ putStrLn . show
+            "--current" -> withVolumeDo
+                               (\(VolumeInfo _ _ oldVol _) ->
+                               case oldVol of
+                                   Just x -> putStrLn $ show x
+                                   Nothing -> putStrLn "something wrong")
             _ -> adjustVolumeStr arg
 
 
