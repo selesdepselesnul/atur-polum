@@ -27,35 +27,42 @@ withVolumeDo f =
 
 setVolumeIfValidVolume
   :: (Integer -> Integer)
-     -> (Integer -> Integer -> Integer -> Integer -> Volume -> IO ())
+     -> (Integer -> Integer -> Volume -> IO ())
      -> IO ()
 setVolumeIfValidVolume fVolume fResult =
   withVolumeDo
       (\(VolumeInfo minVol maxVol oldVol playbackVol) -> 
          let setIfValid oldVol newVol
-                 | newVol > maxVol = putStrLn "volume reach max value"
-                 | newVol < minVol = putStrLn "volume reach min value"
-                 | otherwise = fResult minVol maxVol oldVol newVol playbackVol
+                 | newVol > maxVol = putStrLn "value doesnt valid, > max vol"
+                 | newVol < minVol = putStrLn "value doesnt valid, < min vol"
+                 | otherwise = fResult oldVol newVol playbackVol
          in case oldVol of 
               Just x -> setIfValid x $ fVolume x 
               _ -> putStrLn "failed")
-  
+
+setPlaybackFrontLeftChannel :: Volume -> Integer -> IO ()
+setPlaybackFrontLeftChannel x =
+    setChannel FrontLeft (value x)
+
 adjustVolume :: Integer -> IO ()
 adjustVolume i =
     setVolumeIfValidVolume
         (+ i)
-        (\minVol maxVol oldVol newVol playbackVol -> do
-            setChannel FrontLeft (value playbackVol) newVol
+        (\_ newVol playbackVol -> do
+            setPlaybackFrontLeftChannel playbackVol newVol
             putStrLn $ show newVol)
                  
 setVolume :: Integer -> IO ()
 setVolume i =
   setVolumeIfValidVolume
       (\_ -> i)
-      (\minVol maxVol oldVol newVol playbackVol -> do
-          setChannel FrontLeft (value playbackVol) (-oldVol)
-          setChannel FrontLeft (value playbackVol) i 
-          putStrLn $ show i)
+      (\oldVol _ playbackVol ->
+          let setFrontLeftChannel = 
+                  setPlaybackFrontLeftChannel playbackVol 
+          in do
+            setFrontLeftChannel (-oldVol)
+            setFrontLeftChannel i 
+            putStrLn $ show i)
 
 validateArg :: (Integer -> IO ()) -> String -> IO ()
 validateArg f vol =
