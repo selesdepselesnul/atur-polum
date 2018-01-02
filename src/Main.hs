@@ -12,7 +12,10 @@ data VolumeInfo = VolumeInfo {min::Integer,
 
 instance Show VolumeInfo where
   show (VolumeInfo min max (Just vol) _) =
-    "Min : " ++ (show min) ++ ", Max : " ++ (show max) ++ ", Vol : " ++ (show vol)
+    "Min : " ++ (show min)
+    ++ ", Max : " ++ (show max)
+    ++ ", Vol : " ++ (show vol)
+
   show (VolumeInfo _ _ Nothing _) = "Something wrong"
 
 withVolumeDo :: (VolumeInfo -> IO a) -> IO a
@@ -42,7 +45,7 @@ setVolumeIfValidVolume fVolume fResult =
 
 setPlaybackFrontLeftChannel :: Volume -> Integer -> IO ()
 setPlaybackFrontLeftChannel x =
-    setChannel FrontLeft (value x)
+    setChannel FrontLeft $ value x
 
 adjustVolume :: Integer -> IO ()
 adjustVolume i =
@@ -72,7 +75,7 @@ validateArg f vol =
 
 adjustVolumeStr :: String -> IO ()
 adjustVolumeStr arg
-    | List.isInfixOf "+" arg = validateArg adjustVolume $ last (Split.splitOn "+" arg)
+    | List.isInfixOf "+" arg = validateArg adjustVolume $ last $ Split.splitOn "+" arg
     | List.isInfixOf "-" arg = validateArg adjustVolume arg
     | otherwise = validateArg setVolume arg
    
@@ -85,15 +88,15 @@ main = do
         let arg = (head args)
         case arg of
             "--min" -> withVolumeDo
-                           (\(VolumeInfo minVol _ _ _) -> (putStrLn . show) minVol)
+                           (\(VolumeInfo minVol _ _ _) -> putStrLn $ show minVol)
             "--max" -> withVolumeDo
-                           (\(VolumeInfo _ maxVol _ _) -> (putStrLn . show) maxVol)
+                           (\(VolumeInfo _ maxVol _ _) -> putStrLn $ show maxVol)
             "--all" -> withVolumeDo $ putStrLn . show
             "--current" -> withVolumeDo
                                (\(VolumeInfo _ _ oldVol _) ->
-                               case oldVol of
-                                   Just x -> putStrLn $ show x
-                                   Nothing -> putStrLn "something wrong")
+                                   case oldVol of
+                                       Just x -> putStrLn $ show x
+                                       Nothing -> putStrLn "something wrong")
             _ -> adjustVolumeStr arg
 
 
