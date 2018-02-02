@@ -99,6 +99,8 @@ main = do
                                        Nothing -> putStrLn "something wrong")
             "--set-min" -> withVolumeDo
                                (\(VolumeInfo minVol _ _ _) -> adjustVolumeStr $ show minVol)
+            "--set-max" -> withVolumeDo
+                               (\(VolumeInfo _  maxVol _ _) -> adjustVolumeStr $ show maxVol)
             _ -> adjustVolumeStr arg
 
 
