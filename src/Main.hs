@@ -97,6 +97,8 @@ main = do
                                    case oldVol of
                                        Just x -> putStrLn $ show x
                                        Nothing -> putStrLn "something wrong")
+            "--set-min" -> withVolumeDo
+                               (\(VolumeInfo minVol _ _ _) -> adjustVolumeStr $ show minVol)
             _ -> adjustVolumeStr arg
 
 
